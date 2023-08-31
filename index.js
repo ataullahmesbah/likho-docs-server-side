@@ -26,29 +26,36 @@ const client = new MongoClient(uri, {
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// Connect to MongoDB
 async function run() {
   try {
-    // Connect the client to the server (optional starting in v4.7)
     await client.connect();
 
+    // Define collections
     const documentationTypeCollection = client.db('likho').collection('documentationTypes');
+    const blogPostCollection = client.db('likho').collection('blogPosts');
 
-    // API Routes
-    // ... (existing routes)
 
-    // File Upload Route
-    app.post('/api/upload', upload.single('file'), (req, res) => {
-      if (!req.file) {
-        return res.status(400).json({ error: 'No file provided' });
+
+
+    // Create Blog Post Route
+    app.post('/blogPosts', async (req, res) => {
+      try {
+        const newBlogPost = await blogPostCollection.insertOne(req.body);
+        res.status(201).json(newBlogPost);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
       }
+    });
 
-      const fileContent = req.file.buffer.toString('utf8');
-
-      // Save fileContent to a database or file
-      // For example, you can create a new file and save the content
-      fs.writeFileSync('uploaded_file.txt', fileContent);
-
-      res.json({ fileContent });
+    // Get All Blog Posts Route
+    app.get('/blogPosts', async (req, res) => {
+      try {
+        const blogPosts = await blogPostCollection.find().toArray();
+        res.json(blogPosts);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
     });
 
     // Send a ping to confirm a successful connection
