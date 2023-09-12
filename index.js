@@ -34,6 +34,7 @@ async function run() {
     // Define collections
     const documentationTypeCollection = client.db('likho').collection('documentationTypes');
     const blogPostCollection = client.db('likho').collection('blogPosts');
+    const templatesCollection = client.db('likho').collection('templates');
 
 
 
@@ -57,6 +58,20 @@ async function run() {
         res.status(500).json({ error: error.message });
       }
     });
+
+
+    // Get All templates Route
+    app.get('/templates', async (req, res) => {
+      try {
+        const templates = await templatesCollection.find().toArray();
+        res.json(templates);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+
+
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
