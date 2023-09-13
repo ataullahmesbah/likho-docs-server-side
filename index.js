@@ -11,7 +11,9 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eiraya6.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eiraya6.mongodb.net/your-database-name?retryWrites=true&w=majority`;
+
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eiraya6.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -35,6 +37,8 @@ async function run() {
     const documentationTypeCollection = client.db('likho').collection('documentationTypes');
     const blogPostCollection = client.db('likho').collection('blogPosts');
     const templatesCollection = client.db('likho').collection('templates');
+    const ckEditCollection = client.db('likho').collection('ckEditCollection');
+
 
 
 
@@ -69,6 +73,32 @@ async function run() {
         res.status(500).json({ error: error.message });
       }
     });
+
+    // Example server route for creating a new data entry
+    app.post('/templates', async (req, res) => {
+      try {
+        // Assuming req.body contains the data sent from the client
+        const newTemplate = await templatesCollection.insertOne(req.body);
+        res.status(201).json(newTemplate);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+
+
+    app.post('/ckEditData', async (req, res) => {
+      try {
+        const newData = req.body; // Assuming req.body contains the data from CKEditor
+        const result = await ckEditCollection.insertOne(newData);
+        res.status(201).json(result.ops[0]);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+
+
 
 
 
