@@ -24,6 +24,25 @@ const client = new MongoClient(uri, {
   },
 });
 
+// Import the socket.io library and attach it to the server
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+
+// WebSocket handling
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  // Handle document changes
+  socket.on('document-changed', (newContent) => {
+    // Broadcast the updated content to all connected clients
+    io.emit('document-changed', newContent);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
+});
+
 // Set up multer storage
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -74,6 +93,7 @@ async function run() {
       }
     });
 
+
     // Example server route for creating a new data entry
     app.post('/templates', async (req, res) => {
       try {
@@ -96,11 +116,6 @@ async function run() {
         res.status(500).json({ error: error.message });
       }
     });
-
-
-
-
-
 
 
     // Send a ping to confirm a successful connection
